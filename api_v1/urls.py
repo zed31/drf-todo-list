@@ -17,7 +17,10 @@ urlpatterns = [
         name='user-list'),
     url(r'^auth/', 
         include('rest_framework.urls'), 
-        name='authentication'),
+        name='login'),
+    url(r'',
+        views.api_root,
+        name='default'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
