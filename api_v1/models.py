@@ -14,6 +14,7 @@ class TodoListModel(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     status = models.CharField(choices=STATUS_CHOICE, default='Created', max_length=100)
+    owner = models.ForeignKey('UserModel', related_name='tasks', on_delete=models.CASCADE)
 
     class Meta:
         """
