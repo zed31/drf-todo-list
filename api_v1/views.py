@@ -107,4 +107,5 @@ def api_root(request, format=None):
     return Response({
         'todo': reverse('todo-list', request=request, format=format),
         'user': reverse('user-list', request=request, format=format),
+        'login': reverse('login-view', request=request, format=format),
     })
