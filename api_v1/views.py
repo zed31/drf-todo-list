@@ -1,6 +1,7 @@
-from rest_framework import generics
+from rest_framework import generics, permissions
 from .serializers import TodoListSerializer, UserSerializer
 from .models import TodoListModel, UserModel
+from .permissions import IsOwnerOrAdminOrReadOnly
 
 # Create your views here.
 class ListTodo(generics.ListCreateAPIView):
@@ -10,6 +11,17 @@ class ListTodo(generics.ListCreateAPIView):
     """
     queryset = TodoListModel.objects.all()
     serializer_class = TodoListSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly,)
+
+    def perform_create(self, serializer):
+        """
+            Override the perform_create from the generic
+            serializers.
+
+            :param self: Class
+            :param serializer: serializer used to perform actions
+        """
+        serializer.save(owner=self.request.user)
 
 class DetailTodo(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -18,6 +30,7 @@ class DetailTodo(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = TodoListModel.objects.all()
     serializer_class = TodoListSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly,)
 
 class ListUser(generics.ListCreateAPIView):
     """
@@ -26,6 +39,7 @@ class ListUser(generics.ListCreateAPIView):
     """
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly,)
 
 class DetailUser(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -35,3 +49,4 @@ class DetailUser(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly,)
