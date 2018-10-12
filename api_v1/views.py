@@ -24,7 +24,7 @@ class ListUser(generics.ListCreateAPIView):
         List all users from the database
         also allows POST request to create some
     """
-    queryset = UserModel
+    queryset = UserModel.objects.all()
     serializer_class = UserSerializer
 
 class DetailUser(generics.RetrieveUpdateDestroyAPIView):
@@ -33,5 +33,5 @@ class DetailUser(generics.RetrieveUpdateDestroyAPIView):
         also allows the update and the destroy of this
         specific user
     """
-    queryset = UserModel
+    queryset = UserModel.objects.all()
     serializer_class = UserSerializer
