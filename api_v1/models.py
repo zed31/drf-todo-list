@@ -1,7 +1,5 @@
 from django.db import models, IntegrityError
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
 
 # Create your models here.
 class TodoListModel(models.Model):
@@ -31,17 +29,6 @@ class UserManager(BaseUserManager):
     """
     use_in_migration = True
 
-    def validate_email(self, email: str) -> bool:
-        """
-            Check if the email is correct
-            :param email: The email being validated
-        """
-        try:
-            validate_email( email )
-            return True
-        except ValidationError:
-            return False
-
     def __save_and_return(self, user, password: str, is_staff: bool, is_admin: bool):
         """
             Save the user inside the database by setting some values and
@@ -68,8 +55,6 @@ class UserManager(BaseUserManager):
             :param password: the password field
         """
         normalized_email = self.normalize_email(email)
-        if not self.validate_email(email=normalized_email):
-            return None
         user = self.model(email=normalized_email)
         return self.__save_and_return(user=user, password=password, is_admin=False, is_staff=False)
     
