@@ -58,10 +58,21 @@ class DetailUser(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly,)
 
+def retrieve_email_and_password(request):
+    """
+        Extract the email and the password from a request
+
+        :param request: The request
+    """
+    email = request.data.get('email', '')
+    password = request.data.get('password', '')
+    return email, password
+
 class UserAuthenticationView(APIView):
     """
         Post and generate the authentication as well as login
     """
+
     def post(self, request, format=None):
         """
             Post method used to authenticate the user
@@ -71,8 +82,7 @@ class UserAuthenticationView(APIView):
             :param request: The request on a django request format
             :param format: The request format
         """
-        email = request.data.get('email', '')
-        password = request.data.get('password', '')
+        email, password = retrieve_email_and_password(request)
         authentication_backend = EmailBackendModel()
         user = authentication_backend.authenticate(username=email, password=password)
         if user is None:
@@ -81,6 +91,18 @@ class UserAuthenticationView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         login(request, user)
         return Response(status=status.HTTP_200_OK)
+
+class UserRegistrationView(APIView):
+    """
+        Post to register an user
+    """
+    def post(self, request, format=None):
+        email, password = retrieve_email_and_password(request)
+        user = UserModel.objects.create_user(email=email, password=password)
+        if user is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
+
 
 class LogoutView(APIView):
     """
