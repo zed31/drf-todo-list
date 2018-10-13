@@ -1,0 +1,12 @@
+GET_METHOD = 'GET'
+POST_METHOD = 'POST'
+PUT_METHOD = 'PUT'
+DELETE_METHOD = 'DELETE'
+URI_KEY = 'uri'
+METHOD_KEY = 'methods'
+TODO_LIST_URI_INFO = 'todo_list'
+USER_LIST_URI_INFO = 'user_list'
+LOGOUT_URI_INFO = 'logout'
+LOGIN_URI_INFO = 'login'
+REGISTRATION_URI_INFO = 'register'
+

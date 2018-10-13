@@ -1,0 +1,8 @@
+TODO_DETAIL_NAME = 'todo-detail'
+TODO_LIST_NAME = 'todo-list'
+USER_LIST_NAME = 'user-list'
+USER_DETAIL_NAME = 'user-detail'
+LOGIN_NAME = 'login-view'
+REGISTER_NAME = 'registration-view'
+LOGOUT_NAME = 'logout-view'
+DEFAULT_NAME = 'default'
