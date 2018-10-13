@@ -87,7 +87,6 @@ class UserAuthenticationView(APIView):
         email, password = retrieve_email_and_password(request)
         authentication_backend = EmailBackendModel()
         user = authentication_backend.authenticate(username=email, password=password)
-        print(user.email)
         if user is None:
             return Response({'errors': 'The requested user does not exist'}, status=status.HTTP_400_BAD_REQUEST)
         if user.is_ban:
