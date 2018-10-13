@@ -1,7 +1,7 @@
 from django.conf.urls import url, include
 from rest_framework.urlpatterns import format_suffix_patterns
 from . import views
-from . import urls_name
+from . import urls_name, urls_auth
 
 urlpatterns = [
     url(r'^todo/(?P<pk>\d+)/', 
@@ -16,15 +16,10 @@ urlpatterns = [
     url(r'^users/', 
         views.ListUser.as_view(),
         name=urls_name.USER_LIST_NAME),
-    url(r'^auth/login/',
-        views.UserAuthenticationView.as_view(),
-        name=urls_name.LOGIN_NAME),
-    url(r'^auth/logout/',
-        views.LogoutView.as_view(),
-        name=urls_name.LOGOUT_NAME),
-    url(r'^auth/register/',
-        views.UserRegistrationView.as_view(),
-        name=urls_name.REGISTER_NAME),
+]
+
+urlpatterns += urls_auth.urlpatterns
+urlpatterns += [
     url(r'',
         views.api_root,
         name=urls_name.DEFAULT_NAME),
