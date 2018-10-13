@@ -13,7 +13,7 @@ class TodoListModel(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=200)
     description = models.TextField()
-    status = models.CharField(choices=STATUS_CHOICE, default='Created', max_length=100)
+    status = models.CharField(choices=STATUS_CHOICE, default='C', max_length=100)
     owner = models.ForeignKey('UserModel', related_name='tasks', on_delete=models.CASCADE)
 
     class Meta:
@@ -29,7 +29,7 @@ class UserManager(BaseUserManager):
     """
     use_in_migration = True
 
-    def __save_and_return(self, user, password: str, is_staff: bool, is_admin: bool):
+    def __save_and_return(self, user, password: str, is_staff: bool, is_superuser: bool):
         """
             Save the user inside the database by setting some values and
             using the default database
@@ -37,11 +37,11 @@ class UserManager(BaseUserManager):
             :param user: The user model
             :param password: The stored password
             :param is_staff: boolean field to know if it's a staff user
-            :param is_admin: boolean field to know if the user is an administrator
+            :param is_superuser: boolean field to know if the user is an administrator
         """
         try:
             user.is_staff = is_staff
-            user.is_admin = is_admin
+            user.is_superuser = is_superuser
             user.set_password(password)
             user.save(using=self._db)
             return user
@@ -56,7 +56,7 @@ class UserManager(BaseUserManager):
         """
         normalized_email = self.normalize_email(email)
         user = self.model(email=normalized_email)
-        return self.__save_and_return(user=user, password=password, is_admin=False, is_staff=False)
+        return self.__save_and_return(user=user, password=password, is_superuser=False, is_staff=False)
     
     def create_staffuser(self, email: models.EmailField, password: str):
         """
@@ -65,7 +65,7 @@ class UserManager(BaseUserManager):
             :param password: the password field
         """
         user = self.create_user(email=email, password=password)
-        return self.__save_and_return(user=user, password=password, is_admin=False, is_staff=True)
+        return self.__save_and_return(user=user, password=password, is_superuser=False, is_staff=True)
     
     def create_superuser(self, email: models.EmailField, password: str):
         """
@@ -74,7 +74,7 @@ class UserManager(BaseUserManager):
             :param password: the password field
         """
         user = self.create_user(email=email, password=password)
-        return self.__save_and_return(user=user, password=password, is_admin=True, is_staff=True)
+        return self.__save_and_return(user=user, password=password, is_superuser=True, is_staff=True)
 
 class UserModel(AbstractBaseUser):
     """
@@ -85,6 +85,7 @@ class UserModel(AbstractBaseUser):
     username = None
     email = models.EmailField(('email address'), unique=True)
     is_ban = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
