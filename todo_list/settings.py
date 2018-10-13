@@ -71,7 +71,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'todo_list.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
@@ -130,5 +129,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_EMAIL_FIELD = 'email'
 ACCOUNT_LOGOUT_ON_GET = True
+
+AUTHENTICATION_BACKENDS = ['api_v1.authentication.EmailBackendModel']
 
 AUTH_USER_MODEL = 'api_v1.UserModel'

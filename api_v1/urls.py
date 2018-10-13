@@ -15,9 +15,18 @@ urlpatterns = [
     url(r'^users/', 
         views.ListUser.as_view(),
         name='user-list'),
-    url(r'^auth/', 
-        include('rest_framework.urls'), 
-        name='authentication'),
+    url(r'^auth/login/',
+        views.UserAuthenticationView.as_view(),
+        name='login-view'),
+    url(r'^auth/logout/',
+        views.LogoutView.as_view(),
+        name='logout-view'),
+    url(r'^auth/register/',
+        views.UserRegistrationView.as_view(),
+        name='registration-view'),
+    url(r'',
+        views.api_root,
+        name='default'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -18,4 +18,4 @@ class IsOwnerOrAdminOrReadOnly(permissions.BasePermission):
             :param obj: the requested object
         """
 
-        return True if request.method in permissions.SAFE_METHODS or obj.owner == request.user.owner or request.user.is_admin else False
+        return True if request.method in permissions.SAFE_METHODS or obj.owner == request.user or request.user.is_admin else False

@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, IntegrityError
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
@@ -39,19 +39,23 @@ class UserManager(BaseUserManager):
             :param is_staff: boolean field to know if it's a staff user
             :param is_admin: boolean field to know if the user is an administrator
         """
-        user.is_staff = is_staff
-        user.is_admin = is_admin
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
+        try:
+            user.is_staff = is_staff
+            user.is_admin = is_admin
+            user.set_password(password)
+            user.save(using=self._db)
+            return user
+        except IntegrityError:
+            return None
 
-    def create_user(self, email: models.EmailField, password: str=None):
+    def create_user(self, email: str, password: str=None):
         """
             Create an user
             :param email: the email field
             :param password: the password field
         """
-        user = self.model(email=self.normalize_email(email))
+        normalized_email = self.normalize_email(email)
+        user = self.model(email=normalized_email)
         return self.__save_and_return(user=user, password=password, is_admin=False, is_staff=False)
     
     def create_staffuser(self, email: models.EmailField, password: str):
