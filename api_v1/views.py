@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
 from .serializers import TodoListSerializer, UserSerializer
 from .models import TodoListModel, UserModel
-from .permissions import IsOwnerOrAdminOrReadOnly
+from .permissions import IsOwnerOrAdminOrReadOnly, IsAdmin, IsNotBanned
 from .authentication import EmailBackendModel
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -20,7 +20,7 @@ class ListTodo(generics.ListCreateAPIView):
     """
     queryset = TodoListModel.objects.all()
     serializer_class = TodoListSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly, IsNotBanned,)
 
     def perform_create(self, serializer):
         """
@@ -39,7 +39,7 @@ class DetailTodo(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = TodoListModel.objects.all()
     serializer_class = TodoListSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly, IsNotBanned,)
 
 class ListUser(generics.ListCreateAPIView):
     """
@@ -48,7 +48,7 @@ class ListUser(generics.ListCreateAPIView):
     """
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsAdmin, IsNotBanned,)
 
 class DetailUser(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -58,7 +58,7 @@ class DetailUser(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsNotBanned,)
 
 def retrieve_email_and_password(request):
     """
@@ -130,7 +130,7 @@ class LogoutView(APIView):
     """
         Logout the user
     """
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, IsNotBanned,)
 
     def get(self, request, fromat=None):
         """
