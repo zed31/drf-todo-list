@@ -87,12 +87,14 @@ class UserAuthenticationView(APIView):
         email, password = retrieve_email_and_password(request)
         authentication_backend = EmailBackendModel()
         user = authentication_backend.authenticate(username=email, password=password)
+        print(user.email)
         if user is None:
             return Response({'errors': 'The requested user does not exist'}, status=status.HTTP_400_BAD_REQUEST)
         if user.is_ban:
             return Response({'errors': 'The requested user is banned'}, status=status.HTTP_400_BAD_REQUEST)
         login(request, user)
-        return Response(status=status.HTTP_200_OK)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class UserRegistrationView(APIView):
     """
