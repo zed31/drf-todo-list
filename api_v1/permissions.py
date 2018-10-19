@@ -20,6 +20,21 @@ class IsOwnerOrAdminOrReadOnly(permissions.BasePermission):
 
         return True if request.method in permissions.SAFE_METHODS or obj.owner == request.user or request.user.is_superuser else False
 
+class IsOwnerOrAdmin(permissions.BasePermission):
+    """Class permission used to define the access of a view"""
+
+    def has_object_permission(self, request, view, obj):
+        """
+            Reqd permission and check if the requested object
+            can be used
+
+            :param self: the self method
+            :param request: the user-made request
+            :param view: the targeted view
+            :param obj: the requested object
+        """
+        return obj.owner == request.user or request.user.is_superuser
+
 class IsAdmin(permissions.BasePermission):
     """
         Check if the user is an administrator
@@ -43,7 +58,7 @@ class IsNotBanned(permissions.BasePermission):
         Check if the user is ban and can access or not
         to the page
     """
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         """
             Check if the user is not ban
 

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from .models import TodoListModel, UserModel
-from .permissions import IsAdmin, IsNotBanned, IsOwnerOrAdminOrReadOnly
+from .permissions import IsAdmin, IsNotBanned, IsOwnerOrAdminOrReadOnly, IsOwnerOrAdmin
 from .serializers import TodoListSerializer, UserSerializer
 from . import urls_name
 from . import constants
@@ -18,7 +18,7 @@ class ListTodo(generics.ListCreateAPIView):
     """
     queryset = TodoListModel.objects.all()
     serializer_class = TodoListSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly, IsNotBanned,)
+    permission_classes = (permissions.IsAuthenticated, IsNotBanned,)
 
     def perform_create(self, serializer):
         """
@@ -37,7 +37,7 @@ class DetailTodo(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = TodoListModel.objects.all()
     serializer_class = TodoListSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly, IsNotBanned,)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrAdmin, IsNotBanned,)
 
 class ListUser(generics.ListCreateAPIView):
     """

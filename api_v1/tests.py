@@ -111,33 +111,83 @@ class AuthTest(TestCase):
 
 class TodoListView(TestCase):
     """Test case used to test the todo list view"""
+
+    def __execute_get_request(self, user):
+        """
+            Execute a get request and return the response
+
+            :param user: The user used inside the request
+            :return: An http response
+        """
+        request_get = self.request_factory.get(reverse(urls_name.TODO_LIST_NAME))
+        request_get.user = user
+        todoListView = views.ListTodo.as_view()
+        response = todoListView(request_get)
+        return response
+
+    def __execute_post_request(self, requestUser, jsonTodo):
+        """
+            Execute a post request and return the response
+
+            :param requestUser: The user used during the post request
+            :param jsonTodo: The todo used during the post request
+            :return: An Http response
+        """
+        request_post = self.request_factory.post(reverse(urls_name.TODO_LIST_NAME), jsonTodo)
+        request_post._dont_enforce_csrf_checks = True
+        request_post.user = requestUser
+        todoListView = views.ListTodo.as_view()
+        response = todoListView(request_post)
+        return response
+
     def setUp(self):
         """Setup the test"""
-        self.user = models.UserModel(email='toto.titi@epitech.eu', password='toto')
-
+        self.request_factory = RequestFactory()
+        self.user = models.UserModel(email='toto.titi-list-view-test@epitech.eu', password='toto')
+        self.admin = models.UserModel(email='admin.admin-list-view-test@gmail.com', password='admin', is_superuser=True)
+        self.banned_user = models.UserModel(email='banned.banned-list-view-test@gmail.com', password='banned', is_ban=True)
+        self.admin.save()
+        self.user.save()
+        self.banned_user.save()
+        
     def test_api_can_get_todo(self):
         """Api can get the todo from the database"""
-        self.user.save()
-        sample_todo = models.TodoListModel(title='nourrir le chien', description='nourrir le chien', owner=self.user)
-        sample_todo.save()
-        response = self.client.get(reverse(urls_name.TODO_LIST_NAME))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.__execute_get_request(None)
+        user_response = self.__execute_get_request(self.user)
+        admin_response = self.__execute_get_request(self.admin)
+        banned_repsonse = self.__execute_get_request(self.banned_user)
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, banned_repsonse.status_code)
+        self.assertEqual(status.HTTP_200_OK, admin_response.status_code)
+        self.assertEqual(status.HTTP_200_OK, user_response.status_code)
     
     def test_api_can_post_todo(self):
         """Api can post a todo by being connected"""
+        self.admin.save()
         self.user.save()
-        response_forbidden = self.client.post(reverse(urls_name.TODO_LIST_NAME), {'title': 'test', 'description': 'test'})
-        login_response = self.client.post(reverse(urls_name.LOGIN_NAME), {'email': self.user.email, 'password': self.user.password})
-        response = self.client.post(reverse(urls_name.TODO_LIST_NAME), {'title': 'test', 'description': 'test'})
+        self.banned_user.save()
+        response_forbidden = self.__execute_post_request(None, {'title': 'test', 'description': 'test'})
+        response_forbidden_banned_user = self.__execute_post_request(self.banned_user, {'title': 'test', 'description': 'test'})
+        response_admin_ok = self.__execute_post_request(self.admin, {'title': 'test', 'description': 'test'})
+        response_ok = self.__execute_post_request(self.user, {'title': 'test', 'description': 'test'})
 
         self.assertEqual(status.HTTP_403_FORBIDDEN, response_forbidden.status_code)
-        self.assertEqual(status.HTTP_200_OK, login_response.status_code)
-        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response_forbidden_banned_user.status_code)
+        self.assertEqual(status.HTTP_201_CREATED, response_ok.status_code)
+        self.assertEqual(status.HTTP_201_CREATED, response_admin_ok.status_code)
     
 class TodoDetailView(TestCase):
     """Test case used to test the todo detail view"""
 
     def __execute_get_request(self, todo, user):
+        """
+            Execute a get request and return the response
+
+            :param todo: The todo used for the request
+            :param user: The user used for the request
+            :return: the http response
+        """
         request_get = self.request_factory.get(reverse(urls_name.TODO_DETAIL_NAME, kwargs={'pk': todo.id}))
         request_get.user = user
         detail = views.DetailTodo.as_view()
@@ -148,23 +198,35 @@ class TodoDetailView(TestCase):
         """Setup the test"""
         self.request_factory = RequestFactory()
         self.user = models.UserModel(email='toto.titi@tutu.com', password='test')
+        self.user_banned = models.UserModel(email='banned.user@gmail.com', password='test', is_ban=True)
         self.admin = models.UserModel(email='admin.api@test.com', password='admin', is_superuser=True)
         self.admin.save()
         self.user.save()
+        self.user_banned.save()
         self.todo = models.TodoListModel(title='test', description='test description', owner=self.user)
         self.admin_todo = models.TodoListModel(title='admin todo test', description='admin todo test description', owner=self.admin)
+        self.banned_todo = models.TodoListModel(title='todo made by a banned user', description='todo made by a banned user', owner=self.user_banned)
     
     def test_api_can_get_detail_of_a_todo(self):
         """Test if we can get a detail of a todo"""
         self.todo.save()
         self.admin_todo.save()
+        self.banned_todo.save()
 
         todo = models.TodoListModel.objects.get(owner__email='toto.titi@tutu.com')
         todo_admin = models.TodoListModel.objects.get(owner__email='admin.api@test.com')
         todo_response = self.__execute_get_request(todo, self.user)
-        todo_admin_response = self.__execute_get_request(todo_admin, self.admin)
+        todo_admin_response = self.__execute_get_request(todo_admin, self.user)
+        todo_banned_response = self.__execute_get_request(todo, self.user_banned)
+        todo_admin_right_check_response = self.__execute_get_request(todo, self.admin)
+        todo_banned_user_access_to_todo_response = self.__execute_get_request(self.banned_todo, self.user_banned)
 
+        self.assertEqual(status.HTTP_403_FORBIDDEN, todo_banned_response.status_code)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, todo_admin_response.status_code)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, todo_banned_user_access_to_todo_response.status_code)
         self.assertEqual(status.HTTP_200_OK, todo_response.status_code)
-        self.assertEqual(status.HTTP_200_OK, todo_admin_response.status_code)
+        self.assertEqual(status.HTTP_200_OK, todo_admin_right_check_response.status_code)
+    
+
     
 
