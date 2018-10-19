@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from . import models, urls_name
 from rest_framework.reverse import reverse
 from rest_framework import status
+from django.db import transaction
 
 # Create your tests here.
 class UserTestCase(TestCase):
@@ -81,6 +82,32 @@ class AuthTest(TestCase):
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response_is_ban.status_code)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response_unknown_user.status_code)
+    
+    def test_api_can_register_user(self):
+        """Test if the API can register an user"""
+        self.user.save()
+
+        response = self.client.post(reverse(urls_name.REGISTER_NAME), {'email': 'test.register@gmail.com', 'password': 'test-password'})
+        response_user_already_exist = self.client.post(reverse(urls_name.REGISTER_NAME), {'email': self.user.email, 'password': self.user.password})
+        response_user_email_invalid = self.client.post(reverse(urls_name.REGISTER_NAME), {'email': 'bad-email', 'password': 'unknown'})
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response_user_already_exist.status_code)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response_user_email_invalid.status_code)
+    
+    def test_api_can_logout_user(self):
+        """Test the logout action of the API"""
+        self.user.save()
+
+        login_response = self.client.post(reverse(urls_name.LOGIN_NAME), {'email': self.user.email, 'password': self.user.password})
+        response_logout = self.client.get(reverse(urls_name.LOGOUT_NAME))
+        response_logout_without_auth = self.client.get(reverse(urls_name.LOGOUT_NAME))
+
+        self.assertEqual(status.HTTP_200_OK, login_response.status_code)
+        self.assertEqual(status.HTTP_200_OK, response_logout.status_code)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response_logout_without_auth.status_code)
+
+
 
 class TodoListView(TestCase):
     """Test case used to test the todo list view"""
@@ -102,6 +129,7 @@ class TodoListView(TestCase):
         response_forbidden = self.client.post(reverse(urls_name.TODO_LIST_NAME), {'title': 'test', 'description': 'test'})
         login_response = self.client.post(reverse(urls_name.LOGIN_NAME), {'email': self.user.email, 'password': self.user.password})
         response = self.client.post(reverse(urls_name.TODO_LIST_NAME), {'title': 'test', 'description': 'test'})
+
         self.assertEqual(status.HTTP_403_FORBIDDEN, response_forbidden.status_code)
         self.assertEqual(status.HTTP_200_OK, login_response.status_code)
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
