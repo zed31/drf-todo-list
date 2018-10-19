@@ -1,5 +1,5 @@
-from django.test import TestCase, Client
-from . import models, urls_name
+from django.test import TestCase, Client, RequestFactory
+from . import models, urls_name, views
 from rest_framework.reverse import reverse
 from rest_framework import status
 from django.db import transaction
@@ -133,3 +133,38 @@ class TodoListView(TestCase):
         self.assertEqual(status.HTTP_403_FORBIDDEN, response_forbidden.status_code)
         self.assertEqual(status.HTTP_200_OK, login_response.status_code)
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+    
+class TodoDetailView(TestCase):
+    """Test case used to test the todo detail view"""
+
+    def __execute_get_request(self, todo, user):
+        request_get = self.request_factory.get(reverse(urls_name.TODO_DETAIL_NAME, kwargs={'pk': todo.id}))
+        request_get.user = user
+        detail = views.DetailTodo.as_view()
+        todo_response = detail(request_get, pk=todo.id)
+        return todo_response
+
+    def setUp(self):
+        """Setup the test"""
+        self.request_factory = RequestFactory()
+        self.user = models.UserModel(email='toto.titi@tutu.com', password='test')
+        self.admin = models.UserModel(email='admin.api@test.com', password='admin', is_superuser=True)
+        self.admin.save()
+        self.user.save()
+        self.todo = models.TodoListModel(title='test', description='test description', owner=self.user)
+        self.admin_todo = models.TodoListModel(title='admin todo test', description='admin todo test description', owner=self.admin)
+    
+    def test_api_can_get_detail_of_a_todo(self):
+        """Test if we can get a detail of a todo"""
+        self.todo.save()
+        self.admin_todo.save()
+
+        todo = models.TodoListModel.objects.get(owner__email='toto.titi@tutu.com')
+        todo_admin = models.TodoListModel.objects.get(owner__email='admin.api@test.com')
+        todo_response = self.__execute_get_request(todo, self.user)
+        todo_admin_response = self.__execute_get_request(todo_admin, self.admin)
+
+        self.assertEqual(status.HTTP_200_OK, todo_response.status_code)
+        self.assertEqual(status.HTTP_200_OK, todo_admin_response.status_code)
+    
+
