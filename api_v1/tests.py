@@ -279,18 +279,10 @@ class TodoDetailView(TestCase):
     def test_api_can_put_detail_of_a_todo(self):
         """Test if we can put detail of a todo"""
         user_modification_response = self.__execute_put_request(self.todo, {'title': 'Modified by user', 'description': self.todo.description}, self.user)
-        updated_todo_queryset = models.TodoListModel.objects.filter(id=self.todo.id)
-        updated_todo = updated_todo_queryset.get()
         user_modification_ill_formed_response = self.__execute_put_request(self.todo, {'title': 'Modified by user'}, self.user)
         user_modification_on_another_task = self.__execute_put_request(self.admin_todo, {'title': 'Modified by user', 'description': 'Description modified by user'}, self.user)
-
         admin_modification_response = self.__execute_put_request(self.todo, {'title': 'Modified by the admin', 'description': 'Description modified by the admin'}, self.admin)
-        updated_todo_admin_queryset = models.TodoListModel.objects.filter(id=self.todo.id)
-        updated_todo_admin = updated_todo_admin_queryset.get()
-
         banned_forbidden_modification = self.__execute_put_request(self.banned_todo, {'title': 'modified by a banned user', 'description': self.banned_todo.description}, self.user_banned)
-        updated_todo_banned_queryset = models.TodoListModel.objects.filter(id=self.banned_todo.id)
-        updated_todo_banned = updated_todo_banned_queryset.get()
         
         self.assertEqual(status.HTTP_200_OK, user_modification_response.status_code)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, user_modification_ill_formed_response.status_code)
