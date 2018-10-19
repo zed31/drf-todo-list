@@ -193,6 +193,33 @@ class TodoDetailView(TestCase):
         detail = views.DetailTodo.as_view()
         todo_response = detail(request_get, pk=todo.id)
         return todo_response
+    
+    def __execute_put_request(self, todo, modification, user):
+        """
+            Execute a put request and return the response
+
+            :param todo: The todo used for the request
+            :param user: The user used for the request
+            :return: The Http reponse
+        """
+        request_put = self.request_factory.put(reverse(urls_name.TODO_DETAIL_NAME, kwargs={'pk': todo.id}), modification, content_type='application/json')
+        request_put.user = user
+        request_put._dont_enforce_csrf_checks = True
+        detail = views.DetailTodo.as_view()
+        return detail(request_put, pk=todo.id)
+
+    def __execute_delete_command(self, todo, user):
+        """
+            Execute a delete command and return the response
+
+            :param todo: The todo used for the request
+            :param user: The user used for the request
+        """
+        request_delete = self.request_factory.delete(reverse(urls_name.TODO_DETAIL_NAME, kwargs={'pk': todo.id}))
+        request_delete.user = user
+        request_delete._dont_enforce_csrf_checks = True
+        detail = views.DetailTodo.as_view()
+        return detail(request_delete, pk=todo.id)
 
     def setUp(self):
         """Setup the test"""
@@ -206,13 +233,35 @@ class TodoDetailView(TestCase):
         self.todo = models.TodoListModel(title='test', description='test description', owner=self.user)
         self.admin_todo = models.TodoListModel(title='admin todo test', description='admin todo test description', owner=self.admin)
         self.banned_todo = models.TodoListModel(title='todo made by a banned user', description='todo made by a banned user', owner=self.user_banned)
-    
-    def test_api_can_get_detail_of_a_todo(self):
-        """Test if we can get a detail of a todo"""
         self.todo.save()
         self.admin_todo.save()
         self.banned_todo.save()
 
+    def test_api_can_delete_todo(self):
+        """Test case that check if we can delete the todos"""
+        todo_by_user = models.TodoListModel(title='test to remove', description='test descritpion to remove', owner=self.user)
+        todo_by_user_removed_by_admin = models.TodoListModel(title='test to remove', description='test descritpion to remove', owner=self.user)
+        todo_by_admin = models.TodoListModel(title='test to remove', description='todo from the admin to remove', owner=self.admin)
+        todo_by_banned_user = models.TodoListModel(title='test to remove', description='todo from the admin to remove', owner=self.admin)
+        todo_by_user.save()
+        todo_by_user_removed_by_admin.save()
+        todo_by_admin.save()
+        todo_by_banned_user.save()
+
+        removed_user_todo = self.__execute_delete_command(todo=todo_by_user, user=self.user)
+        removed_admin_todo_forbidden = self.__execute_delete_command(todo=todo_by_admin, user=self.user)
+        removed_admin_todo_user = self.__execute_delete_command(todo=todo_by_user_removed_by_admin, user=self.admin)
+        removed_task_by_banned_user_forbidden = self.__execute_delete_command(todo=todo_by_banned_user, user=self.user_banned)
+        removed_non_existent_todo = self.__execute_delete_command(todo=todo_by_user, user=self.user)
+
+        self.assertEqual(status.HTTP_204_NO_CONTENT, removed_user_todo.status_code)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, removed_admin_todo_forbidden.status_code)
+        self.assertEqual(status.HTTP_204_NO_CONTENT, removed_admin_todo_user.status_code)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, removed_task_by_banned_user_forbidden.status_code)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, removed_non_existent_todo.status_code)
+    
+    def test_api_can_get_detail_of_a_todo(self):
+        """Test if we can get a detail of a todo"""
         todo = models.TodoListModel.objects.get(owner__email='toto.titi@tutu.com')
         todo_admin = models.TodoListModel.objects.get(owner__email='admin.api@test.com')
         todo_response = self.__execute_get_request(todo, self.user)
@@ -227,6 +276,32 @@ class TodoDetailView(TestCase):
         self.assertEqual(status.HTTP_200_OK, todo_response.status_code)
         self.assertEqual(status.HTTP_200_OK, todo_admin_right_check_response.status_code)
     
+    def test_api_can_put_detail_of_a_todo(self):
+        """Test if we can put detail of a todo"""
+        user_modification_response = self.__execute_put_request(self.todo, {'title': 'Modified by user', 'description': self.todo.description}, self.user)
+        updated_todo_queryset = models.TodoListModel.objects.filter(id=self.todo.id)
+        updated_todo = updated_todo_queryset.get()
+        user_modification_ill_formed_response = self.__execute_put_request(self.todo, {'title': 'Modified by user'}, self.user)
+        user_modification_on_another_task = self.__execute_put_request(self.admin_todo, {'title': 'Modified by user', 'description': 'Description modified by user'}, self.user)
 
+        admin_modification_response = self.__execute_put_request(self.todo, {'title': 'Modified by the admin', 'description': 'Description modified by the admin'}, self.admin)
+        updated_todo_admin_queryset = models.TodoListModel.objects.filter(id=self.todo.id)
+        updated_todo_admin = updated_todo_admin_queryset.get()
+
+        banned_forbidden_modification = self.__execute_put_request(self.banned_todo, {'title': 'modified by a banned user', 'description': self.banned_todo.description}, self.user_banned)
+        updated_todo_banned_queryset = models.TodoListModel.objects.filter(id=self.banned_todo.id)
+        updated_todo_banned = updated_todo_banned_queryset.get()
+        
+        self.assertEqual(status.HTTP_200_OK, user_modification_response.status_code)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, user_modification_ill_formed_response.status_code)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, user_modification_on_another_task.status_code)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, banned_forbidden_modification.status_code)
+        self.assertEqual(status.HTTP_200_OK, admin_modification_response.status_code)
+        self.assertEqual(1, updated_todo_queryset.count())
+        self.assertEqual(1, updated_todo_admin_queryset.count())
+        self.assertEqual(1, updated_todo_banned_queryset.count())
+        self.assertEqual('Modified by user', updated_todo.title)
+        self.assertEqual('Modified by the admin', updated_todo_admin.title)
+        self.assertEqual('Description modified by the admin', updated_todo_admin.description)
+        self.assertEqual('todo made by a banned user', updated_todo_banned.title)
     
-
