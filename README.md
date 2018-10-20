@@ -48,7 +48,7 @@ and access to your todo, the following fields compose the user:
 
 To install it, just clone the repository and run the following command:
 
-`pip install -r <PATH_TO_API>/requirements.txt`
+`pip install -r <TODOLIST_REPOSITORY>/requirements.txt`
 
 Or you can create a virtualenv like this:
 
@@ -56,11 +56,30 @@ Or you can create a virtualenv like this:
 virtualenv -p python3 venv
 source venv/bin/activate
 cd <TODOLIST_REPOSITORY>
-pip install -r <PATH_TO_API>/requirements.txt
+pip install -r <TODOLIST_REPOSITORY>/requirements.txt
 
 #Make sure everything worked:
 cd <TODOLIST_REPOSITORY>
 python3 manage.py test
 ```
 
+Just replace the `TODOLIST_REPOSITORY` by the actual repository
+
 **Make sure you have python3 installed**
+
+## Run the server
+
+To run the server simply use: `python3 manage.py runserver`
+
+## Routes
+
+| Path     | Description                                                             | Methods |
+| -------- | ----------------------------------------------------------------------- | ------- |
+| /api/v1/ | List all the routes you can access from the API with your current state | GET     |
+| /api/v1/auth/login | Used by the user to logged in and create a session            | POST    |
+| /api/v1/auth/register | Used by a new user to register and be able to log in       | POST    |
+| /api/v1/auth/logout   | Logout the user                                            | GET     |
+| /api/v1/todo          | List all todos and allows you to create some               | GET / POST |
+| /api/v1/todo/<PK>     | Allows a basic RUD on a specific todo                     | GET / PUT / DELETE |
+| /api/v1/users/        | List all users and allows administrator to create some     | GET / POST |
+| /api/v1/users/<PK>    | Allows a basic RUD on a specific user                     | GET / PUT / DELETE |
