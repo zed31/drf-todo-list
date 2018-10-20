@@ -43,3 +43,10 @@ and access to your todo, the following fields compose the user:
 | password     | The password used by the user to register or authenticate                    | CharField    |
 | is_superuser | Boolean used to detect if the user is an administrator or a regular user     | BooleanField |
 | is_ban       | Boolean used to detect if the user is ban or not                             | BooleanField |
+
+## Install the API
+
+To install it, just clone the repository and run the following command:
+`pip install -r <PATH_TO_API>/requirements.txt`
+
+**Make sure you have python3 installed**
