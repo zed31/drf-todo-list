@@ -32,4 +32,14 @@ Todo are objects without logic on it, basically a todo contains just the followi
 | description | The description of the todo  | TextField  |
 | owner       | The owner (User) of the task | ForeignKey |
 
+## User
 
+User are objects that allows you to authenticate through session authentication or even register
+and access to your todo, the following fields compose the user:
+
+| Field        | Description                                                                  | Type         |
+| ------------ | ---------------------------------------------------------------------------- | ------------ |
+| email        | The email used by the user to register or authenticate, must be unique       | EmailField   |
+| password     | The password used by the user to register or authenticate                    | CharField    |
+| is_superuser | Boolean used to detect if the user is an administrator or a regular user     | BooleanField |
+| is_ban       | Boolean used to detect if the user is ban or not                             | BooleanField |
