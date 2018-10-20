@@ -47,6 +47,16 @@ and access to your todo, the following fields compose the user:
 ## Install the API
 
 To install it, just clone the repository and run the following command:
+
 `pip install -r <PATH_TO_API>/requirements.txt`
+
+Or you can create a virtualenv like this:
+
+```sh
+$> virtualenv -p python3 venv
+$> source venv/bin/activate
+$> cd <TODOLIST_REPOSITORY>
+$> pip install -r <PATH_TO_API>/requirements.txt
+```
 
 **Make sure you have python3 installed**
