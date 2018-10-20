@@ -53,10 +53,14 @@ To install it, just clone the repository and run the following command:
 Or you can create a virtualenv like this:
 
 ```sh
-$> virtualenv -p python3 venv
-$> source venv/bin/activate
-$> cd <TODOLIST_REPOSITORY>
-$> pip install -r <PATH_TO_API>/requirements.txt
+virtualenv -p python3 venv
+source venv/bin/activate
+cd <TODOLIST_REPOSITORY>
+pip install -r <PATH_TO_API>/requirements.txt
+
+#Make sure everything worked:
+cd <TODOLIST_REPOSITORY>
+python3 manage.py test
 ```
 
 **Make sure you have python3 installed**
