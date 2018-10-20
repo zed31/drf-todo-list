@@ -3,7 +3,7 @@
 This project consist of creating an API using Django Rest Framework technology. The goal of this API is to provide a business logic related to a
 todo list.
 
-## How it works
+# How it works
 
 Todolist API have 2 main objects:
 - TODO: Which is represented by a title and a description and an owner
@@ -44,7 +44,7 @@ and access to your todo, the following fields compose the user:
 | is_superuser | Boolean used to detect if the user is an administrator or a regular user     | BooleanField |
 | is_ban       | Boolean used to detect if the user is ban or not                             | BooleanField |
 
-## Install the API
+# Install the API
 
 To install it, just clone the repository and run the following command:
 
@@ -67,11 +67,11 @@ Just replace the `TODOLIST_REPOSITORY` by the actual repository
 
 **Make sure you have python3 installed**
 
-## Run the server
+# Run the server
 
 To run the server simply use: `python3 manage.py runserver`
 
-## Routes
+# Routes
 
 In all paths containing a `PK`, replace the `PK` by the primary key
 
@@ -125,3 +125,24 @@ The following permission tab applies to each administrator profiles
 | /api/v1/users/PK/      | GET    | Y       |
 | /api/v1/users/PK/      | PUT    | Y       |
 | /api/v1/users/PK/      | DELETE | Y       |
+
+# Request examples
+
+## Registration example
+
+To register a new user just do the following request to the api:
+
+Header:
+```
+Content-Type: application/json
+```
+
+Body:
+```json
+{
+    'email': 'foo.bar@gmail.com',
+    'password': 'secret_password'
+}
+```
+
+
