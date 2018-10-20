@@ -31,6 +31,15 @@ Todo are objects without logic on it, basically a todo contains just the followi
 | title       | The title of the todo        | CharField  |
 | description | The description of the todo  | TextField  |
 | owner       | The owner (User) of the task | ForeignKey |
+| status      | Status of the todo           | Choice     |
+
+The following value applies to the Todo status:
+
+| Status | Value       |
+| ------ | ----------- |
+| C      | Created     |
+| P      | In progress |
+| D      | Done        |
 
 ## User
 
@@ -132,6 +141,28 @@ The following permission tab applies to each administrator profiles
 
 To register a new user just do the following request to the api:
 
+Make a `post` request on the route `/api/<api_version>/auth/register/`
+
+Header:
+```
+Content-Type: application/json
+```
+
+Body:
+```json
+{
+    "email": "foo.bar@gmail.com",
+    "password": "secret_password"
+}
+```
+## Login example
+
+The login (if succeed) will return you the things you can do once you are logged in (i.e: All the route you can access). Login will also provides 2 things inside the cookies:
+- The session id used to determine your session
+- The CSRF token to prevent Cross Site Request Forgery
+
+Make a `post` request on the route `/api/<api_version>/auth/login/`
+
 Header:
 ```
 Content-Type: application/json
@@ -145,4 +176,20 @@ Body:
 }
 ```
 
+## Create a todo
 
+To create a todo you first need to create a session by login to the API, then execute a `post` request on the following route: `/api/<api_version>/todo/`
+
+Header
+```
+Content-Type: application/json
+XCSRF-Token: <generated_token>
+```
+
+Body
+```json
+{
+    "title": "title of the todo",
+    "description" : "description of the todo"
+}
+```
