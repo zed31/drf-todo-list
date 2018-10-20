@@ -55,6 +55,8 @@ and access to your todo, the following fields compose the user:
 
 # Install the API
 
+## Install manually
+
 To install it, just clone the repository and run the following command:
 
 `pip install -r <TODOLIST_REPOSITORY>/requirements.txt`
@@ -75,6 +77,15 @@ python3 manage.py test
 Just replace the `TODOLIST_REPOSITORY` by the actual repository
 
 **Make sure you have python3 installed**
+
+## With docker
+
+You can simply use docker-compose by running the following command:
+```sh
+git clonet <REPO>
+docker-compose build
+docker-compose up
+```
 
 # Run the server
 
