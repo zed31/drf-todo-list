@@ -73,6 +73,8 @@ To run the server simply use: `python3 manage.py runserver`
 
 ## Routes
 
+In all paths containing a `PK`, replace the `PK` by the primary key
+
 | Path     | Description                                                             | Methods |
 | -------- | ----------------------------------------------------------------------- | ------- |
 | /api/v1/ | List all the routes you can access from the API with your current state | GET     |
@@ -80,6 +82,6 @@ To run the server simply use: `python3 manage.py runserver`
 | /api/v1/auth/register | Used by a new user to register and be able to log in       | POST    |
 | /api/v1/auth/logout   | Logout the user                                            | GET     |
 | /api/v1/todo          | List all todos and allows you to create some               | GET / POST |
-| /api/v1/todo/<PK>     | Allows a basic RUD on a specific todo                     | GET / PUT / DELETE |
+| /api/v1/todo/PK     | Allows a basic RUD on a specific todo                     | GET / PUT / DELETE |
 | /api/v1/users/        | List all users and allows administrator to create some     | GET / POST |
-| /api/v1/users/<PK>    | Allows a basic RUD on a specific user                     | GET / PUT / DELETE |
+| /api/v1/users/PK    | Allows a basic RUD on a specific user                     | GET / PUT / DELETE |
