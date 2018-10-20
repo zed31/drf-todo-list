@@ -64,6 +64,50 @@ class UserTestCase(TestCase):
         self.assertEqual(True, updated_user.is_ban)
         self.assertEqual('lulu.lala@epitech.eu', updated_email_user.email)
 
+class TodoModelTest(TestCase):
+    """This class test the model of a todo"""
+
+    def setUp(self):
+        """Setup the tests"""
+        self.user = models.UserModel(email='test.test@gmail.com', password='password')
+        self.user.save()
+        self.std_todo = models.TodoListModel(title='first todo to be tested', description='description of the tested todo', owner=self.user)
+    
+    def test_model_can_filter_and_read_todo(self):
+        """Check if we can retrieve todo from the model"""
+        todo_custom = models.TodoListModel(title='Simple todo', description='simple todo', owner=self.user)
+        todo_custom2 = models.TodoListModel(title='custom todo', description='custom todo', owner=self.user)
+        todo_custom.save()
+        todo_custom2.save()
+        todo_queryset = models.TodoListModel.objects.filter(title__contains='todo')
+        todo_queryset_owner = models.TodoListModel.objects.filter(owner__email='test.test@gmail.com')
+        self.assertEqual(2, todo_queryset.count())
+        self.assertEqual(2, todo_queryset_owner.count())
+
+    def test_model_can_create_todolist(self):
+        """Test if we can insert todo inside the database"""
+        self.assertEqual(0, models.TodoListModel.objects.count())
+        self.std_todo.save()
+        self.assertEqual(1, models.TodoListModel.objects.count())
+        registered_todo = models.TodoListModel.objects.get()
+        self.assertEqual(self.std_todo.id, registered_todo.id)
+        self.assertEqual(self.std_todo.title, registered_todo.title)
+        self.assertEqual(self.std_todo.description, registered_todo.description)
+    
+    def test_model_can_edit_todo(self):
+        """Test if we can edit a todo"""
+        self.std_todo.save()
+        models.TodoListModel.objects.filter(id=self.std_todo.id).update(title='modified todo')
+        registered_todo = models.TodoListModel.objects.get()
+        self.assertEqual('modified todo', registered_todo.title)
+    
+    def test_model_can_delte_todo(self):
+        """Test if we can delete the todo"""
+        self.std_todo.save()
+        self.assertEqual(1, models.TodoListModel.objects.count())
+        models.TodoListModel.objects.filter(id=self.std_todo.id).delete()
+        self.assertEqual(0, models.TodoListModel.objects.count())
+
 class AuthTest(TestCase):
     """Test case used to test the authentication and registration"""
     def setUp(self):
@@ -289,4 +333,215 @@ class TodoDetailView(TestCase):
         self.assertEqual(status.HTTP_403_FORBIDDEN, user_modification_on_another_task.status_code)
         self.assertEqual(status.HTTP_403_FORBIDDEN, banned_forbidden_modification.status_code)
         self.assertEqual(status.HTTP_200_OK, admin_modification_response.status_code)
+    
+class UserListTest(TestCase):
+    """Test the UserList view"""
+
+    def __execute_get_request(self, user):
+        """
+            Execute a get request and return the response
+
+            :param user: The user of the get request
+            :return: An Http response
+        """
+        request_get = self.request_factory.get(reverse(urls_name.USER_LIST_NAME))
+        request_get.user = user
+        request_get._dont_enforce_csrf_checks = True
+        listUser = views.ListUser.as_view()
+        return listUser(request_get)
+    
+    def __execute_post_request(self, user, user_to_insert):
+        """
+            Execute a post request and return the response
+
+            :param user: The user of the post request
+            :param user_to_insert: The user to insert inside the database
+            :return: An http response
+        """
+        request_post = self.request_factory.post(reverse(urls_name.USER_LIST_NAME), user_to_insert)
+        request_post.user = user
+        request_post._dont_enforce_csrf_checks = True
+        listUser = views.ListUser.as_view()
+        return listUser(request_post)
+
+    def setUp(self):
+        """Setting up the test case"""
+        self.normal_user = models.UserModel(email='normal-user@gmail.com', password='password')
+        self.admin_user = models.UserModel(email='admin-user@gmail.com', password='password', is_superuser=True)
+        self.banned_user = models.UserModel(email='banned-user@gmail.com', password='password', is_ban=True)
+        self.request_factory = RequestFactory()
+    
+    def test_user_cannot_get_user(self):
+        """Test if the user can retrieve users"""
+        self.normal_user.save()
+        response = self.__execute_get_request(user=self.normal_user)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+    
+    def test_banned_user_cannot_get_users(self):
+        """Test if a banned user can retrieve users"""
+        self.banned_user.save()
+        response = self.__execute_get_request(user=self.banned_user)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+    
+    def test_admin_user_can_get_users(self):
+        """Test if an admin user can retrieve users"""
+        self.admin_user.save()
+        response = self.__execute_get_request(user=self.admin_user)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+    
+    def test_user_cannot_post_user(self):
+        """Test if a user can post a new user"""
+        self.normal_user.save()
+        response = self.__execute_post_request(user=self.normal_user, user_to_insert={'email': 'test@test.com', 'password': 'test'})
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+    
+    def test_banned_user_cannot_post_user(self):
+        """Test if a banned user can post a new user"""
+        self.banned_user.save()
+        response = self.__execute_post_request(user=self.banned_user, user_to_insert={'email': 'test@test.com', 'password': 'test'})
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+    
+    def test_admin_user_can_post_user(self):
+        """Test if an admin can create custom users"""
+        self.admin_user.save()
+        response = self.__execute_post_request(user=self.admin_user, user_to_insert={'email': 'test@test.com', 'password': 'password'})
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+    
+class UserDetailTest(TestCase):
+    """Automated test of the user detail"""
+
+    def __execute_get_request(self, id, user):
+        """
+            Execute a get request and return the response
+
+            :param id: the id of the user to retrieve
+            :param user: the user that makes the request
+            :return: an Http response
+        """
+        request_get = self.request_factory.get(reverse(urls_name.USER_DETAIL_NAME, kwargs={'pk': id}))
+        request_get.user = user
+        detail = views.DetailUser.as_view()
+        return detail(request_get, pk=id)
+    
+    def __execute_put_request(self, id, user, data):
+        """
+            Execute a put request to modify the user with the speicified id
+
+            :param id: The id of the user requested
+            :param user: The user that execute the request
+            :param data: Data to modify
+            :return: An HTTP response
+        """
+        request_put = self.request_factory.put(reverse(urls_name.USER_DETAIL_NAME, kwargs={'pk': id}), data, content_type='application/json')
+        request_put.user = user
+        request_put._dont_enforce_csrf_checks = True
+        detail = views.DetailUser.as_view()
+        return detail(request_put, pk=id)
+    
+    def __execute_delete_request(self, id, user):
+        """
+            Execute a delete request
+
+            :param id: The id of the requested user to delete
+            :param user: The user that makes the request
+            :return: An HTTP response
+        """
+        request_delete = self.request_factory.delete(reverse(urls_name.USER_DETAIL_NAME, kwargs={'pk': id}))
+        request_delete.user = user
+        request_delete._dont_enforce_csrf_checks = True
+        detail = views.DetailUser.as_view()
+        return detail(request_delete, pk=id)
+
+    def setUp(self):
+        """Setup test environnement"""
+        self.request_factory = RequestFactory()
+        self.normal_user = models.UserModel(email='normal.user@test.com', password='password')
+        self.banned_user = models.UserModel(email='banned.user@test.com', password='password', is_ban=True)
+        self.admin_user = models.UserModel(email='admin.user@test.com', password='password', is_superuser=True)
+        self.normal_user.save()
+    
+    def test_user_cannot_get_detailed_user(self):
+        """Check if an user cannot get another profile than itself"""
+        self.admin_user.save()
+        response_admin_profile = self.__execute_get_request(id=self.admin_user.id, user=self.normal_user)
+        response_own_profile = self.__execute_get_request(id=self.normal_user.id, user=self.normal_user)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response_admin_profile.status_code)
+        self.assertEqual(status.HTTP_200_OK, response_own_profile.status_code)
+    
+    def test_banned_user_cannot_get_detailed_user(self):
+        """Check if a banned user can get its own profile or another one"""
+        self.banned_user.save()
+        response_other_user = self.__execute_get_request(id=self.normal_user.id, user=self.banned_user)
+        response_own_profile = self.__execute_get_request(id=self.banned_user.id, user=self.banned_user)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response_other_user.status_code)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response_own_profile.status_code)
+    
+    def test_admin_user_can_access_all_profile(self):
+        """Check if an admin can access to every profile"""
+        self.banned_user.save()
+        self.admin_user.save()
+        response_admin_profile = self.__execute_get_request(id=self.admin_user.id, user=self.admin_user)
+        response_banned_profile = self.__execute_get_request(id=self.banned_user.id, user=self.admin_user)
+        response_normal_user_profile = self.__execute_get_request(id=self.normal_user.id, user=self.admin_user)
+        self.assertEqual(status.HTTP_200_OK, response_admin_profile.status_code)
+        self.assertEqual(status.HTTP_200_OK, response_banned_profile.status_code)
+        self.assertEqual(status.HTTP_200_OK, response_normal_user_profile.status_code)
+    
+    def test_user_cannot_put_other_profile(self):
+        """Test if the user can update other profile"""
+        self.banned_user.save()
+        response_banned_user = self.__execute_put_request(id=self.banned_user.id, user=self.normal_user, data={'is_ban': False})
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response_banned_user.status_code)
+    
+    def test_user_can_update_its_profile(self):
+        """Test if the user can edit its own profile"""
+        response_own_user = self.__execute_put_request(id=self.normal_user.id, user=self.normal_user, data={'email': 'edited-normal-user@gmail.com'})
+        self.assertEqual(status.HTTP_200_OK, response_own_user.status_code)
+    
+    def test_banned_user_can_update_its_own_profile(self):
+        """Test if a banned user can edit its own profile"""
+        self.banned_user.save()
+        response_banned_user = self.__execute_put_request(id=self.banned_user.id, user=self.banned_user, data={'email': 'edit-banned-user@gmail.com'})
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response_banned_user.status_code)
+    
+    def test_admin_can_edit_other_profile(self):
+        """Test if an admin can edit other profile"""
+        self.admin_user.save()
+        response_own_user = self.__execute_put_request(id=self.normal_user.id, user=self.admin_user, data={'email': 'modified-by-admin@gmail.com', 'is_ban': True})
+        self.assertEqual(status.HTTP_200_OK, response_own_user.status_code)
+    
+    def test_user_can_delete_its_own_profile(self):
+        """Test if an user can delete its own profile"""
+        response_own_user = self.__execute_delete_request(id=self.normal_user.id, user=self.normal_user)
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response_own_user.status_code)
+    
+    def test_user_cannot_delete_other_profile(self):
+        """Test if an user can delete other profile"""
+        self.banned_user.save()
+        response = self.__execute_delete_request(id=self.banned_user.id, user=self.normal_user)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+    
+    def test_banned_user_cannot_delete_its_own_profile(self):
+        """Test if a banned user can delete its own profile"""
+        self.banned_user.save()
+        response = self.__execute_delete_request(id=self.banned_user.id, user=self.banned_user)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+    
+    def test_banned_user_cannot_delete_other_profile(self):
+        """Test if a banned user can delete other profile than its own"""
+        self.banned_user.save()
+        response = self.__execute_delete_request(id=self.banned_user.id, user=self.banned_user)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+    
+    def test_admin_can_delete_other_profile(self):
+        """Test if an admin can delete other profile"""
+        self.admin_user.save()
+        response = self.__execute_delete_request(id=self.normal_user.id, user=self.admin_user)
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
+    
+    def test_admin_can_delete_its_own_profile(self):
+        """Test if an admin can delete its own profile"""
+        self.admin_user.save()
+        response = self.__execute_delete_request(id=self.admin_user.id, user=self.admin_user)
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
     
