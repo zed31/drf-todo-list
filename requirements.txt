@@ -1,2 +1,2 @@
 django==2.1.2
-django-rest-framework==3.8.2
+django-rest-framework
