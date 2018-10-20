@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from . import request_utils
+from . import models
 
 def retrieve_email_and_password(request):
     """
@@ -69,7 +70,7 @@ class UserRegistrationView(APIView):
         email, password = retrieve_email_and_password(request)
         if not self.__is_valid_email(email=email):
             return Response({'errors': 'The provided email is not valid'}, status=status.HTTP_400_BAD_REQUEST)
-        user = UserModel.objects.create_user(email=email, password=password)
+        user = models.UserModel.objects.create_user(email=email, password=password)
         if not user:
             return Response({'errors': 'The email already exist'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_200_OK)
@@ -86,5 +87,7 @@ class LogoutView(APIView):
             :param request: The request
             :param format: The format of the request
         """
+        if not request_utils.is_user_authenticated(request):
+            return Response({'errors': 'User is not authenticated'}, status=status.HTTP_400_BAD_REQUEST)
         logout(request)
         return Response(status=status.HTTP_200_OK)
