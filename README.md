@@ -194,8 +194,9 @@ To create a todo you first need to create a session by login to the API, then ex
 Header
 ```
 Content-Type: application/json
-XCSRF-Token: <generated_token>
+X-CSRFToken: <generated_token>
 ```
+The generated CSRFT token will be found in the same place as the sessionid, which is inside the cookies.
 
 Body
 ```json
