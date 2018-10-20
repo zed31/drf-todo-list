@@ -88,7 +88,7 @@ In all paths containing a `PK`, replace the `PK` by the primary key
 
 ### User permission
 
-The following permission tab applies for each users:
+The following permission tab applies for each normal user profiles
 
 | Route                  | Method | Allowed        |
 | ---------------------- | ------ | -------------- |
@@ -105,3 +105,23 @@ The following permission tab applies for each users:
 | /api/v1/users/PK/      | GET    | Y (owner only) |
 | /api/v1/users/PK/      | PUT    | Y (owner only) |
 | /api/v1/users/PK/      | DELETE | Y (owner only) |
+
+### Admin permission
+
+The following permission tab applies to each administrator profiles
+
+| Route                  | Method | Allowed |
+| ---------------------- | ------ | ------- |
+| /api/v1/               | GET    | Y       |
+| /api/v1/auth/login/    | POST   | Y       |
+| /api/v1/auth/register/ | POST   | Y       |
+| /api/v1/auth/logout/   | GET    | Y       |
+| /api/v1/todo/          | GET    | Y       |
+| /api/v1/todo/          | POST   | Y       |
+| /api/v1/todo/PK/       | GET    | Y       |
+| /api/v1/todo/PK/       | PUT    | Y       |
+| /api/v1/todo/PK/       | DELETE | Y       |
+| /api/v1/users/         | GET    | Y       |
+| /api/v1/users/PK/      | GET    | Y       |
+| /api/v1/users/PK/      | PUT    | Y       |
+| /api/v1/users/PK/      | DELETE | Y       |
