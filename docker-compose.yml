@@ -5,7 +5,7 @@ services:
     image: nouchka/sqlite3
   api:
     build: .
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py test && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     container_name: todolist_api
     volumes:
       - .:/api/
