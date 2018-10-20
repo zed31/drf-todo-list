@@ -140,8 +140,8 @@ Content-Type: application/json
 Body:
 ```json
 {
-    'email': 'foo.bar@gmail.com',
-    'password': 'secret_password'
+    "email": "foo.bar@gmail.com",
+    "password": "secret_password"
 }
 ```
 
