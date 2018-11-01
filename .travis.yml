@@ -1,6 +1,11 @@
 language: python
 sudo: required
 os: linux
+notifications:
+  email: 
+    - bastien.lecussan@epitech.eu
+    - charles.aubert@epitech.eu
+    - nicolas.gascon@epitech.eu
 python:
   - "3.6"
 services:
