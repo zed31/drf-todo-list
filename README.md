@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.com/zed31/drf-todo-list.svg?branch=master)](https://travis-ci.com/zed31/drf-todo-list)
 
+[![David](https://img.shields.io/david/expressjs/express.svg)]
+
 This project consist of creating an API using Django Rest Framework technology. The goal of this API is to provide a business logic related to a
 todo list.
 
