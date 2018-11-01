@@ -2,7 +2,9 @@ version: '3'
 
 services:
   db:
-    image: nouchka/sqlite3
+    image: postgres
+    volumes:
+      - /var/lib/postgresql/data
   api:
     build: .
     command: bash -c "python manage.py test && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
@@ -13,3 +15,5 @@ services:
       - "8000:8000"
     links:
       - db:db
+    depends_on:
+      - db

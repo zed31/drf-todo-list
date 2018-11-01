@@ -41,7 +41,7 @@ class UserAuthenticationView(APIView):
         if user.is_ban:
             return Response({'errors': 'The requested user is banned'}, status=status.HTTP_400_BAD_REQUEST)
         login(request, user)
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class UserRegistrationView(APIView):
