@@ -1,5 +1,6 @@
 from .models import TodoListModel, UserModel
 from rest_framework import serializers
+from . import urls_name
 
 class TodoListSerializer(serializers.ModelSerializer):
     """
@@ -20,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
         Class used for the JSON serialization and
         SQL deserialization
     """
-    tasks = serializers.HyperlinkedRelatedField(many=True, view_name='todo-detail', read_only=True)
+    tasks = serializers.HyperlinkedRelatedField(many=True, view_name=urls_name.TODO_DETAIL_NAME, read_only=True)
 
     class Meta:
         """
