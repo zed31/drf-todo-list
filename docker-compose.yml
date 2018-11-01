@@ -7,7 +7,7 @@ services:
       - /var/lib/postgresql/data
   test:
     build: .
-    command: bash -c "python manage.py test"
+    command: bash -c "./wait-for-it.sh db:5432 -- python manage.py test"
     container_name: todolist_api_test
     links:
       - db:db
