@@ -56,7 +56,7 @@ class DetailUser(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsSameUserOrAdmin, IsNotBanned,)
+    permission_classes = (permissions.IsAuthenticated, IsSameUserOrAdmin, IsNotBanned,)
 
 def generate_method_information(route_name, request, format, methods):
     """
