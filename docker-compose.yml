@@ -5,6 +5,14 @@ services:
     image: postgres
     volumes:
       - /var/lib/postgresql/data
+  test:
+    build: .
+    command: bash -c "python manage.py test"
+    container_name: todolist_api_test
+    links:
+      - db:db
+    depends_on:
+      - db
   api:
     build: .
     command: bash -c "python manage.py test && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"

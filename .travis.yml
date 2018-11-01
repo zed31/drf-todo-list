@@ -1,0 +1,13 @@
+language: python
+sudo: required
+os: linux
+python:
+  - "3.6"
+services:
+  - docker
+
+before_install:
+  - docker-compose build
+
+script:
+  - docker-compose up test
