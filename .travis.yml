@@ -6,10 +6,8 @@ notifications:
 python:
   - "3.6"
 services:
-  - postgresql
-install:
-  - pip install -r requirements.txt
-before_script:
-  - psql -c "CREATE DATABASE mydb;" -U postgres
+  - docker
+before_install:
+  - docker-compose build
 script:
-  - python manage.py test
+  - docker-compose up test
