@@ -4,9 +4,7 @@ os: linux
 notifications:
   email:
     recipients:
-      - bastien.lecussan@epitech.eu
-      - charles.aubert@epitech.eu
-      - nicolas.gascon@epitech.eu
+      - nicolas1.moreel-lebon@epitech.eu
     on_success: always
     on_failure: always
 python:
