@@ -432,7 +432,7 @@ class UserDetailTest(TestCase):
             :param data: Data to modify
             :return: An HTTP response
         """
-        request_put = self.request_factory.put(reverse(urls_name.USER_DETAIL_NAME, kwargs={'pk': id}), data, content_type='application/json')
+        request_put = self.request_factory.patch(reverse(urls_name.USER_DETAIL_NAME, kwargs={'pk': id}), data, content_type='application/json')
         request_put.user = user
         request_put._dont_enforce_csrf_checks = True
         detail = views.DetailUser.as_view()
