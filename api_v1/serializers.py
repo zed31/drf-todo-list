@@ -30,6 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
 
             :param instance: The instance of the User being updated
             :param validated_data: The validated data being used as reference
+            :return: The edited instance
         """
         for attr, value in validated_data.items():
             instance.set_password(value) if attr == 'password' else setattr(instance, attr, value)
