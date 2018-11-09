@@ -2,12 +2,14 @@ from .authentication import EmailBackendModel
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.core.cache import cache
 from .serializers import UserSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from . import request_utils
 from . import models
+from . import constants
 
 def retrieve_email_and_password(request):
     """
@@ -41,6 +43,7 @@ class UserAuthenticationView(APIView):
         if user.is_ban:
             return Response({'errors': 'The requested user is banned'}, status=status.HTTP_400_BAD_REQUEST)
         login(request, user)
+        cache.set(request.session.session_key, user.email, 60*60*24)
         serializer = UserSerializer(user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -89,5 +92,6 @@ class LogoutView(APIView):
         """
         if not request_utils.is_user_authenticated(request):
             return Response({'errors': 'User is not authenticated'}, status=status.HTTP_400_BAD_REQUEST)
+        cache.delete(request.session.session_key)
         logout(request)
         return Response(status=status.HTTP_200_OK)

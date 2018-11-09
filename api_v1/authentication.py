@@ -1,5 +1,7 @@
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from . import constants
 
 class EmailBackendModel(ModelBackend):
     """
