@@ -4,6 +4,9 @@ from . import views
 from . import urls_name, urls_auth
 
 urlpatterns = [
+    url(r'^me/todo/',
+        views.MeTodo.as_view(),
+        name=urls_name.ME_TODO),
     url(r'^todo/(?P<pk>\d+)/', 
         views.DetailTodo.as_view(),
         name=urls_name.TODO_DETAIL_NAME),
