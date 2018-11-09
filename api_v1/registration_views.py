@@ -9,7 +9,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from . import request_utils
 from . import models
-from . import constants
 
 def retrieve_email_and_password(request):
     """

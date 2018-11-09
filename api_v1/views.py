@@ -9,7 +9,6 @@ from .models import TodoListModel, UserModel
 from .permissions import IsAdmin, IsNotBanned, IsOwnerOrAdminOrReadOnly, IsOwnerOrAdmin, IsSameUserOrAdmin
 from .serializers import TodoListSerializer, UserSerializer
 from . import urls_name
-from . import constants
 from . import request_utils
 
 # Create your views here.
@@ -64,7 +63,7 @@ class MeTodo(generics.ListAPIView):
     """
         Me todo, used to retrieve ONLY the todo of an user
     """
-    queryset = TodoListModel.objects.filter(owner__email=cache.get(constants.CACHE_KEY_USER_ID))
+    queryset = TodoListModel
     serializer_class = TodoListSerializer
     permission_classes = (permissions.IsAuthenticated, IsNotBanned,)
 
