@@ -23,6 +23,14 @@ class UserSerializer(serializers.ModelSerializer):
     """
     tasks = serializers.HyperlinkedRelatedField(many=True, view_name=urls_name.TODO_DETAIL_NAME, read_only=True)
 
+    def create(self, validated_data):
+        """
+            Create a new User using validated data
+        """
+        user_instance = UserModel.objects.create_user(**validated_data)
+        user_instance.save()
+        return user_instance
+
     def update(self, instance, validated_data):
         """
             Update values from the instance thanks to the validated_data
