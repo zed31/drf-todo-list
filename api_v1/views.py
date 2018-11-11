@@ -12,6 +12,33 @@ from . import urls_name
 from . import request_utils
 
 # Create your views here.
+class CreateAdminTodo(generics.CreateAPIView):
+    serializer_class = TodoListSerializer
+    permission_classes = (permissions.IsAuthenticated, IsAdmin, IsNotBanned,)
+
+    """
+        Only used by the administrator to create
+        task to any users
+    """
+    def post(self, request, format=None):
+        """
+            Post request to create todo when you are an administrator
+
+            :param self: The class itself
+            :param request: The post request
+            :param format: The format of the request
+        """
+        try:
+            owner_email = request.data['owner']
+            task_owner = UserModel.objects.get(email=owner_email)
+            task = TodoListModel(title=request.data['title'], description=request.data['description'], owner=task_owner)
+            task.save()
+            serializer = TodoListSerializer(task)
+            return Response(status=status.HTTP_201_CREATED, data=serializer.data)
+        except KeyError:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={'errors': 'Fields required: title, description and owner'})
+        
+
 class ListTodo(generics.ListCreateAPIView):
     """
         List all the todo present inside the database
