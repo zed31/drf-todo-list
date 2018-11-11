@@ -2,12 +2,13 @@ from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-
+from django.core.cache import cache
+from django.core import serializers
+from . import constants
 from .models import TodoListModel, UserModel
 from .permissions import IsAdmin, IsNotBanned, IsOwnerOrAdminOrReadOnly, IsOwnerOrAdmin, IsSameUserOrAdmin
 from .serializers import TodoListSerializer, UserSerializer
 from . import urls_name
-from . import constants
 from . import request_utils
 
 # Create your views here.
@@ -57,6 +58,27 @@ class DetailUser(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAuthenticated, IsSameUserOrAdmin, IsNotBanned,)
+
+class MeTodo(generics.ListAPIView):
+    """
+        Me todo, used to retrieve ONLY the todo of an user
+    """
+    queryset = TodoListModel
+    serializer_class = TodoListSerializer
+    permission_classes = (permissions.IsAuthenticated, IsNotBanned,)
+
+    def get(self, request, format=None):
+        """
+            Get specific task from a specific email stored inside the cache
+            :param self: the self-class
+            :param request: the Request being processed
+            :param format: the format of the request
+            :return: Response with status code and JSON serialized data
+        """
+        objects = TodoListModel.objects.filter(owner__email=cache.get(request.session.session_key))
+        serializer = TodoListSerializer(objects, many=True)
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
+        
 
 def generate_method_information(route_name, request, format, methods):
     """

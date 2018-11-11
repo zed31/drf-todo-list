@@ -14,7 +14,8 @@ services:
     depends_on:
       - db
   api:
-    build: .
+    build: 
+      context: .
     command: bash -c "./wait-for-it.sh db:5432 -- python manage.py makemigrations api_v1 && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     container_name: todolist_api
     volumes:

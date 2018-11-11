@@ -9,4 +9,3 @@ USER_LIST_URI_INFO = 'user_list'
 LOGOUT_URI_INFO = 'logout'
 LOGIN_URI_INFO = 'login'
 REGISTRATION_URI_INFO = 'register'
-
