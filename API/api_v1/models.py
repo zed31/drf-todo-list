@@ -48,7 +48,7 @@ class UserManager(BaseUserManager):
         except IntegrityError:
             return None
 
-    def create_user(self, email: str, password: str=None):
+    def create_user(self, email: str, password: str=None, is_ban: bool=False, is_superuser: bool=False):
         """
             Create an user
             :param email: the email field
@@ -56,7 +56,7 @@ class UserManager(BaseUserManager):
         """
         normalized_email = self.normalize_email(email)
         user = self.model(email=normalized_email)
-        return self.__save_and_return(user=user, password=password, is_superuser=False, is_staff=False)
+        return self.__save_and_return(user=user, password=password, is_superuser=is_superuser, is_staff=False)
     
     def create_staffuser(self, email: models.EmailField, password: str):
         """

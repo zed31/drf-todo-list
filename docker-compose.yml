@@ -6,7 +6,8 @@ services:
     volumes:
       - /var/lib/postgresql/data
   test:
-    build: .
+    build: 
+      context: API/.
     command: bash -c "./wait-for-it.sh db:5432 -- python manage.py test"
     container_name: todolist_api_test
     links:
@@ -15,11 +16,11 @@ services:
       - db
   api:
     build: 
-      context: .
+      context: API/.
     command: bash -c "./wait-for-it.sh db:5432 -- python manage.py makemigrations api_v1 && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     container_name: todolist_api
     volumes:
-      - .:/api/
+      - .:/api/API/
     ports:
       - "8000:8000"
     links:
