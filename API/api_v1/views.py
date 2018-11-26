@@ -102,7 +102,7 @@ class MeTodo(generics.ListAPIView):
             :param format: the format of the request
             :return: Response with status code and JSON serialized data
         """
-        objects = TodoListModel.objects.filter(owner__email=cache.get(request.session.session_key))
+        objects = TodoListModel.objects.filter(owner__email=request.user.email)
         serializer = TodoListSerializer(objects, many=True)
         return Response(status=status.HTTP_200_OK, data=serializer.data)
         
